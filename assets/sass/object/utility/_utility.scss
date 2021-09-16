@@ -1,0 +1,44 @@
+@use "../../global" as g;
+
+.u-frame{
+  @include g.responsive(md) {
+    max-width: g.vw-size-pc(g.$frame_w);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  @include g.responsive(xxl) {
+    max-width:#{g.$frame_w}px;
+  }
+}
+
+.u-noscroll{
+  overflow: hidden;
+  height:100%;
+}
+
+.u-overflowHidden {
+  overflow: hidden;
+}
+
+.u-noevent{
+  pointer-events:none;
+}
+
+.u-exSp {
+  display: none;
+  @include g.responsive(md) {
+    display: block;
+  }
+}
+
+.u-sp{
+  @include g.responsive(md) {
+    display: none;
+  }
+}
+
+.u-preline{
+  white-space: pre-line;
+}
+

@@ -1,0 +1,22 @@
+@use "../global" as g;
+
+.l-header {
+  padding: 60px 0;
+  @include g.responsive(md) {
+    padding: 90px 0;
+  }
+  @include g.responsive(xxl) {
+  }
+
+  &__title{
+    text-align: center;
+    font-size: 24px;
+    font-weight: 300;
+    @include g.responsive(md) {
+      font-size: 30px;
+    }
+    @include g.responsive(xxl) {
+    }
+  }
+}
+

@@ -1,0 +1,26 @@
+@use "../global" as g;
+
+.l-footer {
+  padding: 60px 0;
+  text-align: center;
+  @include g.responsive(md) {
+    padding: 90px 0;
+  }
+  @include g.responsive(xxl) {
+  }
+
+  &__back{
+    display: inline-block;
+    font-size: 12px;
+    @include g.responsive(md) {
+    }
+    @include g.responsive(xxl) {
+    }
+
+    @media (any-hover:hover) {
+      &:hover{
+        text-decoration: underline;
+      }
+    }
+  }
+}

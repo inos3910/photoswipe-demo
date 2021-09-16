@@ -1,0 +1,39 @@
+@use "../../global" as g;
+
+.p-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0 15px;
+  @include g.responsive(md) {
+    padding: 0;
+  }
+  @include g.responsive(xxl) {
+  }
+
+  &__item{
+    width: calc(25% - 9px);
+    margin-bottom: 9px;
+
+    @include g.responsive(md) {
+      width: calc(16.666% - 18px);
+      margin-bottom: 18px;
+    }
+    @include g.responsive(xxl) {
+    }
+
+    a{
+      display: block;
+
+      @media (any-hover:hover) {
+        &:hover{
+          box-shadow: g.$boxshadow2;
+        }
+      }
+    }
+
+    img{
+      width: 100%;
+    }
+  }
+}

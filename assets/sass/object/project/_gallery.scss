@@ -1,14 +1,42 @@
 @use "../../global" as g;
 
 .p-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding: 0 15px;
   @include g.responsive(md) {
-    padding: 0;
   }
   @include g.responsive(xxl) {
+  }
+
+  &:nth-child(n + 2){
+    margin-top: 60px;
+    @include g.responsive(md) {
+      margin-top: 90px;
+    }
+    @include g.responsive(xxl) {
+    }
+  }
+
+  &__caption{
+    text-align: center;
+    font-size: 18px;
+    @include g.responsive(md) {
+      font-size: 24px;
+    }
+    @include g.responsive(xxl) {
+    }
+  }
+
+  &__inner{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 15px;
+    margin-top: 15px;
+    @include g.responsive(md) {
+      padding: 0;
+      margin-top: 30px;
+    }
+    @include g.responsive(xxl) {
+    }
   }
 
   &__item{

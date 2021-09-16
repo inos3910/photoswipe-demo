@@ -6,14 +6,15 @@ import PhotoSwipeUI_Default from 'photoswipe/src/js/ui/photoswipe-ui-default.js'
 
 export default class Main {
   constructor() {
-    this.photoswipe = null;
-    this.initPhotoswipe('#js-gallery');
+    this.photoswipe = [];
+    this.photoswipeUi = PhotoSwipeUI_Default;
+    this.initPhotoswipe('.js-gallery');
   }
 
   async initPhotoswipe(elemName) {
     const template = this.addTemplate();
-    this.pswpElement = template.querySelector('.pswp');
-    if(!this.pswpElement){
+    const pswpElement = template.querySelector('.pswp');
+    if(!pswpElement){
       return;
     }
 
@@ -22,19 +23,16 @@ export default class Main {
       return;
     }
 
-    const galleryElement = galleryElements[0];
-
     for(let i = 0, l = galleryElements.length; i < l; i++) {
       galleryElements[i].setAttribute('data-pswp-uid', i+1);
+      const items = await this.parseThumbnailElements(galleryElements[i]);
+
+      const options = this.initOptions(galleryElements[i], items);
+
+      this.onThumbnailsClick(pswpElement, items, options, i);
+
+      this.openByHash(pswpElement, items, options, i);
     }
-
-    this.items = await this.parseThumbnailElements(galleryElement);
-
-    this.options = this.initOptions(galleryElement, this.items);
-
-    this.onThumbnailsClick(this.pswpElement, PhotoSwipeUI_Default, this.items, this.options);
-
-    this.openByHash();
   }
 
   //ポップアップ用のHTMLを追加
@@ -125,13 +123,13 @@ export default class Main {
   }
 
   //画像のクリック
-  onThumbnailsClick(pswpElement, PhotoSwipeUI_Default, items, options) {
+  onThumbnailsClick(pswpElement, items, options, i) {
     items.forEach((item, index) => {
       item.el.addEventListener('click', (e) => {
         e.preventDefault();
         options.index = index;
-        this.photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
-        this.photoswipe.init();
+        this.photoswipe[i] = new PhotoSwipe( pswpElement, this.photoswipeUi, items, options);
+        this.photoswipe[i].init();
       }, {passive: false});
     });
   }
@@ -164,12 +162,13 @@ export default class Main {
     return params;
   }
 
-  openByHash() {
+  //ハッシュ値に応じて起動
+  openByHash(pswpElement, items, options, i) {
     const hashData = this.parseHash();
     if(hashData.pid && hashData.gid) {
-      this.options.index = hashData.pid;
-      this.photoswipe = new PhotoSwipe( this.pswpElement, PhotoSwipeUI_Default, this.items, this.options);
-      this.photoswipe.init();
+      options.index = hashData.pid;
+      this.photoswipe[i] = new PhotoSwipe(pswpElement, this.photoswipeUi, items, options);
+      this.photoswipe[i].init();
     }
   }
 

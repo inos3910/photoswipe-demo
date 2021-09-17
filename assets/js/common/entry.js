@@ -96,9 +96,9 @@ export default class Main {
   loadImage(src) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.src = src;
       img.onload = () => resolve(img);
       img.onerror = (e) => reject(e);
+      img.src = src;
     });
   }
 
@@ -117,7 +117,8 @@ export default class Main {
           w:rect.width
         };
       },
-      index: 0
+      index: 0,
+      history: false
     }
     return options;
   }

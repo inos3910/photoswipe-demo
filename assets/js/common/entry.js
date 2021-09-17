@@ -8,10 +8,29 @@ export default class Main {
   constructor() {
     this.photoswipe = [];
     this.photoswipeUi = PhotoSwipeUI_Default;
-    this.initPhotoswipe('.js-gallery');
+
+    this.initPhotoswipe('.js-gallery-1');
+
+    this.initPhotoswipe('.js-gallery-2', {
+      history: true,
+      bgOpacity: 0.8,
+      showHideOpacity : true,
+      shareEl : true,
+      shareButtons: [
+      {id:'facebook', label:'Share on Facebook', url:'https://www.facebook.com/sharer/sharer.php?u={{url}}'},
+      {id:'twitter', label:'Tweet', url:'https://twitter.com/intent/tweet?text={{text}}&url={{url}}'},
+      {id:'download', label:'Download image', url:'{{raw_image_url}}', download:true}
+      ],
+    });
   }
 
-  async initPhotoswipe(elemName) {
+  /**
+  * PhotiSwipeの初期化
+  * @param {string} elemName - 画像グループのHTML要素名
+  * @param {object} options - PhotoSwipeのオプション
+  * @return {void}
+  **/
+  async initPhotoswipe(elemName, options = {}) {
     const template = this.addTemplate();
     const pswpElement = template.querySelector('.pswp');
     if(!pswpElement){
@@ -27,7 +46,7 @@ export default class Main {
       galleryElements[i].setAttribute('data-pswp-uid', i+1);
       const items = await this.parseThumbnailElements(galleryElements[i]);
 
-      const options = this.initOptions(galleryElements[i], items);
+      options = this.initOptions(galleryElements[i], items, options);
 
       this.onThumbnailsClick(pswpElement, items, options, i);
 
@@ -35,7 +54,10 @@ export default class Main {
     }
   }
 
-  //ポップアップ用のHTMLを追加
+  /**
+  * ポップアップ用のHTMLを追加
+  * @return {void}
+  **/
   addTemplate() {
     const elem = document.createElement("div");
     elem.innerHTML = '<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"><div class="pswp__bg"></div><div class="pswp__scroll-wrap"><div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div><div class="pswp__item"></div></div><div class="pswp__ui pswp__ui--hidden"><div class="pswp__top-bar"><div class="pswp__counter"></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button><button class="pswp__button pswp__button--share" title="Share"></button><button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button><button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div> </div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button><button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class="pswp__caption"><div class="pswp__caption__center"></div></div></div></div></div>';
@@ -43,7 +65,11 @@ export default class Main {
     return elem;
   }
 
-  //画像情報
+  /**
+  * 画像情報の配列を取得
+  * @param {HTMLElement} target - 画像グループのHTML要素
+  * @return {promise} - 画像情報の配列をPromiseで返す
+  **/
   async parseThumbnailElements(target) {
 
     const items = [];
@@ -92,7 +118,11 @@ export default class Main {
     return items;
   }
 
-  //画像の非同期読み込み
+  /**
+  * 画像の非同期読み込み
+  * @param {string} src - 画像のURL
+  * @return {promise} - imageオブジェクトをPromiseで返す
+  **/
   loadImage(src) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -102,11 +132,20 @@ export default class Main {
     });
   }
 
-  //オプションの初期設定
-  initOptions(galleryElement, items) {
-    const options = {
-      galleryUID       : galleryElement.getAttribute('data-pswp-uid'),
-      getThumbBoundsFn : (index) => {
+  /**
+  * オプションの初期化
+  * @param {HTMLElement} galleryElement - 画像グループのHTML要素
+  * @param {array} items - 画像情報の配列
+  * @param {object} options - PhotoSwipeのオプション
+  * @return {object}
+  **/
+  initOptions(galleryElement, items, options = {}) {
+    if(!('galleryUID' in options)){
+      options.galleryUID = galleryElement.getAttribute('data-pswp-uid')
+    }
+
+    if(!('getThumbBoundsFn' in options)){
+      options.getThumbBoundsFn = (index) => {
         const thumbnail = items[index].el.getElementsByTagName('img')[0],
         pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
         rect = thumbnail.getBoundingClientRect();
@@ -116,14 +155,32 @@ export default class Main {
           y:rect.top + pageYScroll,
           w:rect.width
         };
-      },
-      index: 0,
-      history: false
+      }
     }
+
+    if(!('index' in options)){
+      options.index = 0;
+    }
+
+    if(!('history' in options)){
+      options.history = false;
+    }
+
+    if(!('shareEl' in options)){
+      options.shareEl = false;
+    }
+
     return options;
   }
 
-  //画像のクリック
+  /**
+  * 画像のクリック
+  * @param {HTMLElement} pswpElement - ポップアップテンプレートのHTML要素
+  * @param {array} items - 画像情報の配列
+  * @param {object} options - PhotoSwipeのオプション
+  * @param {number} i - 画像グループのuid
+  * @return {void}
+  **/
   onThumbnailsClick(pswpElement, items, options, i) {
     items.forEach((item, index) => {
       item.el.addEventListener('click', (e) => {
@@ -135,7 +192,10 @@ export default class Main {
     });
   }
 
-  //起動時にURLに付くハッシュ値を解析
+  /**
+  * 起動時にURLに付くハッシュ値を解析
+  * @return {void}
+  **/
   parseHash() {
     const hash = window.location.hash.substring(1),
     params = {};
@@ -163,10 +223,18 @@ export default class Main {
     return params;
   }
 
-  //ハッシュ値に応じて起動
+  /**
+  * ハッシュ値に応じて起動
+  * @param {HTMLElement} pswpElement - ポップアップテンプレートのHTML要素
+  * @param {array} items - 画像情報の配列
+  * @param {object} options - PhotoSwipeのオプション
+  * @param {number} i - 画像グループのuid
+  * @return {void}
+  **/
   openByHash(pswpElement, items, options, i) {
     const hashData = this.parseHash();
     if(hashData.pid && hashData.gid) {
+      options.galleryUID = hashData.gid;
       options.index = hashData.pid;
       this.photoswipe[i] = new PhotoSwipe(pswpElement, this.photoswipeUi, items, options);
       this.photoswipe[i].init();

@@ -12,6 +12,7 @@
   &__back{
     display: inline-block;
     font-size: 12px;
+    line-height: 2;
     @include g.responsive(md) {
     }
     @include g.responsive(xxl) {

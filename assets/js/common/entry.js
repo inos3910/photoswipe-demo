@@ -8,7 +8,6 @@ import Swiper, { Navigation, Pagination, EffectCreative } from 'swiper';
 
 export default class Main {
   constructor() {
-    this.swiper = [];
     this.photoswipe = [];
     this.photoswipeUi = PhotoSwipeUI_Default;
 
@@ -30,7 +29,7 @@ export default class Main {
   /**
   * Swiperの初期化
   * @param {string} elemNode - Swiperを適用するのHTML要素
-  * @return {void}
+  * @return {Object} - Swiperインスタンス
   **/
   initSwiper(elemNode) {
     const swiperOptions = {
@@ -84,15 +83,15 @@ export default class Main {
     for(let i = 0, l = galleryElements.length; i < l; i++) {
       galleryElements[i].setAttribute('data-pswp-uid', i+1);
       const items = await this.parseThumbnailElements(galleryElements[i]);
-      let _options = JSON.parse(JSON.stringify(options));
+      let swiper, _options = JSON.parse(JSON.stringify(options));
 
       _options = this.initOptions(galleryElements[i], items, _options);
 
       if(galleryElements[i].classList.contains('swiper-wrapper')){
-        this.swiper[i] = this.initSwiper(galleryElements[i].parentNode);
+        swiper = this.initSwiper(galleryElements[i].parentNode);
       }
 
-      this.onThumbnailsClick(pswpElement, items, _options, i, this.swiper[i]);
+      this.onThumbnailsClick(pswpElement, items, _options, i, swiper);
 
       if(('history' in _options) && _options.history){
         this.openByHash(pswpElement, items, _options, i);
@@ -225,6 +224,7 @@ export default class Main {
   * @param {array} items - 画像情報の配列
   * @param {object} options - PhotoSwipeのオプション
   * @param {number} i - 画像グループのuid
+  * @param {Object} swiper - Swiperインスタンス
   * @return {void}
   **/
   onThumbnailsClick(pswpElement, items, options, i, swiper) {

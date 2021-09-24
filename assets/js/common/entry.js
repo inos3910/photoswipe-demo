@@ -4,8 +4,11 @@ import "regenerator-runtime/runtime";
 import PhotoSwipe from 'photoswipe'
 import PhotoSwipeUI_Default from 'photoswipe/src/js/ui/photoswipe-ui-default.js'
 
+import Swiper, { Navigation, Pagination } from 'swiper';
+
 export default class Main {
   constructor() {
+    this.swiper = [];
     this.photoswipe = [];
     this.photoswipeUi = PhotoSwipeUI_Default;
 
@@ -22,6 +25,29 @@ export default class Main {
       {id:'download', label:'Download image', url:'{{raw_image_url}}', download:true}
       ],
     });
+  }
+
+  /**
+  * Swiperの初期化
+  * @param {string} elemNode - Swiperを適用するのHTML要素
+  * @return {void}
+  **/
+  initSwiper(elemNode) {
+    const swiperOptions = {
+      modules: [Navigation, Pagination],
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true
+      },
+      slidesPerView: 3,
+      spaceBetween: 10,
+    };
+
+    return new Swiper(elemNode, swiperOptions);
   }
 
   /**
@@ -49,7 +75,11 @@ export default class Main {
 
       _options = this.initOptions(galleryElements[i], items, _options);
 
-      this.onThumbnailsClick(pswpElement, items, _options, i);
+      if(galleryElements[i].classList.contains('swiper-wrapper')){
+        this.swiper[i] = this.initSwiper(galleryElements[i].parentNode);
+      }
+
+      this.onThumbnailsClick(pswpElement, items, _options, i, this.swiper[i]);
 
       if(('history' in _options) && _options.history){
         this.openByHash(pswpElement, items, _options, i);
@@ -184,16 +214,24 @@ export default class Main {
   * @param {number} i - 画像グループのuid
   * @return {void}
   **/
-  onThumbnailsClick(pswpElement, items, options, i) {
+  onThumbnailsClick(pswpElement, items, options, i, swiper) {
     items.forEach((item, index) => {
       item.el.addEventListener('click', (e) => {
         e.preventDefault();
         options.index = index;
         this.photoswipe[i] = new PhotoSwipe( pswpElement, this.photoswipeUi, items, options);
         this.photoswipe[i].init();
+
+        if(swiper){
+          this.photoswipe[i].listen('afterChange', () => {
+            swiper.slideTo(this.photoswipe[i].getCurrentIndex());
+          });
+        }
+
       }, {passive: false});
     });
   }
+
 
   /**
   * 起動時にURLに付くハッシュ値を解析

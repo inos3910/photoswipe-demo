@@ -52,7 +52,7 @@
         "postcss-flexbugs-fixes": "^5.0.2",
         "postcss-import": "^14.0.2",
         "sass": "^1.41.0",
-        "swiper": "^7.0.5",
+        "swiper": "^7.0.6",
         "terser-webpack-plugin": "^5.2.4",
         "through2": "^4.0.2",
         "vinyl": "^2.2.1",

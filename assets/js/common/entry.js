@@ -45,12 +45,15 @@ export default class Main {
     for(let i = 0, l = galleryElements.length; i < l; i++) {
       galleryElements[i].setAttribute('data-pswp-uid', i+1);
       const items = await this.parseThumbnailElements(galleryElements[i]);
+      let _options = JSON.parse(JSON.stringify(options));
 
-      options = this.initOptions(galleryElements[i], items, options);
+      _options = this.initOptions(galleryElements[i], items, _options);
 
-      this.onThumbnailsClick(pswpElement, items, options, i);
+      this.onThumbnailsClick(pswpElement, items, _options, i);
 
-      this.openByHash(pswpElement, items, options, i);
+      if(('history' in _options) && _options.history){
+        this.openByHash(pswpElement, items, _options, i);
+      }
     }
   }
 
@@ -141,7 +144,7 @@ export default class Main {
   **/
   initOptions(galleryElement, items, options = {}) {
     if(!('galleryUID' in options)){
-      options.galleryUID = galleryElement.getAttribute('data-pswp-uid')
+      options.galleryUID = galleryElement.getAttribute('data-pswp-uid');
     }
 
     if(!('getThumbBoundsFn' in options)){

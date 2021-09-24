@@ -25,6 +25,12 @@
     }
   }
 
+  &__text{
+    margin-top: 15px;
+    text-align: center;
+    line-height: 2;
+  }
+
   &__inner{
     display: flex;
     flex-wrap: wrap;

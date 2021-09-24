@@ -63,10 +63,10 @@
     }
 
     &--swiper{
+      max-width: 600px;
+      margin-right: auto;
+      margin-left: auto;
       .swiper-slide{
-        flex-grow: 1;
-        width: 33%;
-        margin-right: 10px;
       }
     }
   }

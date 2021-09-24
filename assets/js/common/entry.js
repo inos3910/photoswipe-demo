@@ -4,7 +4,7 @@ import "regenerator-runtime/runtime";
 import PhotoSwipe from 'photoswipe'
 import PhotoSwipeUI_Default from 'photoswipe/src/js/ui/photoswipe-ui-default.js'
 
-import Swiper, { Navigation, Pagination } from 'swiper';
+import Swiper, { Navigation, Pagination, EffectCreative } from 'swiper';
 
 export default class Main {
   constructor() {
@@ -34,7 +34,8 @@ export default class Main {
   **/
   initSwiper(elemNode) {
     const swiperOptions = {
-      modules: [Navigation, Pagination],
+      grabCursor: true,
+      modules: [Navigation, Pagination, EffectCreative],
       navigation: {
         nextEl: ".swiper-button-next",
         prevEl: ".swiper-button-prev",
@@ -43,8 +44,20 @@ export default class Main {
         el: ".swiper-pagination",
         clickable: true
       },
-      slidesPerView: 3,
-      spaceBetween: 10,
+      slidesPerView: 1,
+      effect: "creative",
+      creativeEffect: {
+        prev: {
+          shadow: true,
+          translate: ["-125%", 0, -800],
+          rotate: [0, 0, -90],
+        },
+        next: {
+          shadow: true,
+          translate: ["125%", 0, -800],
+          rotate: [0, 0, 90],
+        },
+      },
     };
 
     return new Swiper(elemNode, swiperOptions);

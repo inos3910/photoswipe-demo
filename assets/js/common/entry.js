@@ -11,9 +11,11 @@ export default class Main {
     this.photoswipe = [];
     this.photoswipeUi = PhotoSwipeUI_Default;
 
-    this.initPhotoswipe('.js-gallery-1');
+    this.initPhotoswipe('[data-photoswipe="1"]');
 
-    this.initPhotoswipe('.js-gallery-2', {
+    this.initPhotoswipe('[data-photoswipe="not-link"]');
+
+    this.initPhotoswipe('[data-photoswipe="2"]', {
       history: true,
       bgOpacity: 0.8,
       showHideOpacity : true,
@@ -32,6 +34,7 @@ export default class Main {
   * @return {Object} - Swiperインスタンス
   **/
   initSwiper(elemNode) {
+
     const swiperOptions = {
       grabCursor: true,
       modules: [Navigation, Pagination, EffectCreative],
@@ -56,46 +59,59 @@ export default class Main {
           translate: ["125%", 0, -800],
           rotate: [0, 0, 90],
         },
-      },
+      }
     };
 
     return new Swiper(elemNode, swiperOptions);
   }
 
   /**
-  * PhotiSwipeの初期化
+  * PhotoSwipeの初期化
   * @param {string} elemName - 画像グループのHTML要素名
   * @param {object} options - PhotoSwipeのオプション
   * @return {void}
   **/
-  async initPhotoswipe(elemName, options = {}) {
+  initPhotoswipe(elemName, options = {}) {
+    const galleryElements = document.querySelectorAll(elemName);
+    if(!galleryElements[0]){
+      return;
+    }
+
     const template = this.addTemplate();
     const pswpElement = template.querySelector('.pswp');
     if(!pswpElement){
       return;
     }
 
-    const galleryElements = document.querySelectorAll(elemName);
-    if(!galleryElements[0]){
-      return;
+    for(let i = 0, l = galleryElements.length; i < l; i++) {
+      this.attachPhotoswipe(galleryElements[i], pswpElement, options, i);
+    }
+  }
+
+  /**
+  * Photoswipeの適用
+  * @param {HTMLElement} elem - PhotoSwipeを適用するHTML要素
+  * @param {HTMLElement} pswpElement - ポップアップテンプレートのHTML要素
+  * @param {object} - PhotoSwipeのオプション
+  * @param {number} -i 画像グループのインデックス
+  * @return {void}
+  **/
+  async attachPhotoswipe(elem, pswpElement, options, i){
+
+    const uid = this.addUid(elem, i);
+    const items = await this.parseThumbnailElements(elem);
+    const _options = this.initOptions(elem, items, options);
+
+    let swiper;
+    if(elem.classList.contains('swiper-wrapper')){
+      swiper = this.initSwiper(elem.parentNode);
     }
 
-    for(let i = 0, l = galleryElements.length; i < l; i++) {
-      galleryElements[i].setAttribute('data-pswp-uid', i+1);
-      const items = await this.parseThumbnailElements(galleryElements[i]);
-      let swiper, _options = JSON.parse(JSON.stringify(options));
+    swiper =  elem.getAttribute('data-photoswipe') !== 'not-link' ? swiper : null;
+    this.onThumbnailsClick(pswpElement, items, _options, uid, swiper);
 
-      _options = this.initOptions(galleryElements[i], items, _options);
-
-      if(galleryElements[i].classList.contains('swiper-wrapper')){
-        swiper = this.initSwiper(galleryElements[i].parentNode);
-      }
-
-      this.onThumbnailsClick(pswpElement, items, _options, i, swiper);
-
-      if(('history' in _options) && _options.history){
-        this.openByHash(pswpElement, items, _options, i);
-      }
+    if(('history' in _options) && _options.history){
+      this.openByHash(pswpElement, items, _options, uid);
     }
   }
 
@@ -108,6 +124,19 @@ export default class Main {
     elem.innerHTML = '<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"><div class="pswp__bg"></div><div class="pswp__scroll-wrap"><div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div><div class="pswp__item"></div></div><div class="pswp__ui pswp__ui--hidden"><div class="pswp__top-bar"><div class="pswp__counter"></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button><button class="pswp__button pswp__button--share" title="Share"></button><button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button><button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div> </div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button><button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class="pswp__caption"><div class="pswp__caption__center"></div></div></div></div></div>';
     document.body.appendChild(elem);
     return elem;
+  }
+
+  /**
+  * 画像グループごとのユニークIDをdata属性に設定
+  * @param {HTMLElement} - PhotoSwipeを適用するHTML要素
+  * @param {number} -i 画像グループのインデックス
+  * @return {string} uid
+  **/
+  addUid(elem, i) {
+    const uidPrefix = elem.getAttribute('data-photoswipe');
+    const uid = !uidPrefix ? i+1 : `${uidPrefix}-${i+1}`;
+    elem.setAttribute('data-pswp-uid', uid);
+    return uid;
   }
 
   /**
@@ -185,12 +214,13 @@ export default class Main {
   * @return {object}
   **/
   initOptions(galleryElement, items, options = {}) {
-    if(!('galleryUID' in options)){
-      options.galleryUID = galleryElement.getAttribute('data-pswp-uid');
+    const _options = JSON.parse(JSON.stringify(options));
+    if(!('galleryUID' in _options)){
+      _options.galleryUID = galleryElement.getAttribute('data-pswp-uid');
     }
 
-    if(!('getThumbBoundsFn' in options)){
-      options.getThumbBoundsFn = (index) => {
+    if(!('getThumbBoundsFn' in _options)){
+      _options.getThumbBoundsFn = (index) => {
         const thumbnail = items[index].el.getElementsByTagName('img')[0],
         pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
         rect = thumbnail.getBoundingClientRect();
@@ -203,19 +233,19 @@ export default class Main {
       }
     }
 
-    if(!('index' in options)){
-      options.index = 0;
+    if(!('index' in _options)){
+      _options.index = 0;
     }
 
-    if(!('history' in options)){
-      options.history = false;
+    if(!('history' in _options)){
+      _options.history = false;
     }
 
-    if(!('shareEl' in options)){
-      options.shareEl = false;
+    if(!('shareEl' in _options)){
+      _options.shareEl = false;
     }
 
-    return options;
+    return _options;
   }
 
   /**
@@ -223,21 +253,21 @@ export default class Main {
   * @param {HTMLElement} pswpElement - ポップアップテンプレートのHTML要素
   * @param {array} items - 画像情報の配列
   * @param {object} options - PhotoSwipeのオプション
-  * @param {number} i - 画像グループのuid
+  * @param {string} uid - 画像グループのuid
   * @param {Object} swiper - Swiperインスタンス
   * @return {void}
   **/
-  onThumbnailsClick(pswpElement, items, options, i, swiper) {
+  onThumbnailsClick(pswpElement, items, options, uid, swiper) {
     items.forEach((item, index) => {
       item.el.addEventListener('click', (e) => {
         e.preventDefault();
         options.index = index;
-        this.photoswipe[i] = new PhotoSwipe( pswpElement, this.photoswipeUi, items, options);
-        this.photoswipe[i].init();
+        this.photoswipe[uid] = new PhotoSwipe( pswpElement, this.photoswipeUi, items, options);
+        this.photoswipe[uid].init();
 
         if(swiper){
-          this.photoswipe[i].listen('afterChange', () => {
-            swiper.slideTo(this.photoswipe[i].getCurrentIndex());
+          this.photoswipe[uid].listen('afterChange', () => {
+            swiper.slideTo(this.photoswipe[uid].getCurrentIndex());
           });
         }
 
@@ -270,10 +300,6 @@ export default class Main {
       params[pair[0]] = pair[1];
     }
 
-    if(params.gid) {
-      params.gid = parseInt(params.gid, 10);
-    }
-
     return params;
   }
 
@@ -282,16 +308,16 @@ export default class Main {
   * @param {HTMLElement} pswpElement - ポップアップテンプレートのHTML要素
   * @param {array} items - 画像情報の配列
   * @param {object} options - PhotoSwipeのオプション
-  * @param {number} i - 画像グループのuid
+  * @param {string} uid - 画像グループのuid
   * @return {void}
   **/
-  openByHash(pswpElement, items, options, i) {
+  openByHash(pswpElement, items, options, uid) {
     const hashData = this.parseHash();
     if(hashData.pid && hashData.gid) {
       options.galleryUID = hashData.gid;
       options.index = hashData.pid;
-      this.photoswipe[i] = new PhotoSwipe(pswpElement, this.photoswipeUi, items, options);
-      this.photoswipe[i].init();
+      this.photoswipe[uid] = new PhotoSwipe(pswpElement, this.photoswipeUi, items, options);
+      this.photoswipe[uid].init();
     }
   }
 

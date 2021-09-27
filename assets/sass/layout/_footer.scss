@@ -1,10 +1,10 @@
 @use "../global" as g;
 
 .l-footer {
-  padding: 60px 0;
+  padding: 150px 0 60px;
   text-align: center;
   @include g.responsive(md) {
-    padding: 90px 0;
+    padding: 150px 0 90px;
   }
   @include g.responsive(xxl) {
   }

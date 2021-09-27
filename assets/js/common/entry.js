@@ -9,7 +9,6 @@ import Swiper, { Navigation, Pagination, EffectCreative } from 'swiper';
 export default class Main {
   constructor() {
     this.photoswipe = [];
-    this.photoswipeUi = PhotoSwipeUI_Default;
 
     this.initPhotoswipe('[data-photoswipe="1"]');
 
@@ -262,7 +261,7 @@ export default class Main {
       item.el.addEventListener('click', (e) => {
         e.preventDefault();
         options.index = index;
-        this.photoswipe[uid] = new PhotoSwipe( pswpElement, this.photoswipeUi, items, options);
+        this.photoswipe[uid] = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
         this.photoswipe[uid].init();
 
         if(swiper){
@@ -316,7 +315,7 @@ export default class Main {
     if(hashData.pid && hashData.gid) {
       options.galleryUID = hashData.gid;
       options.index = hashData.pid;
-      this.photoswipe[uid] = new PhotoSwipe(pswpElement, this.photoswipeUi, items, options);
+      this.photoswipe[uid] = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
       this.photoswipe[uid].init();
     }
   }

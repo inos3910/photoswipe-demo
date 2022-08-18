@@ -21,4 +21,4 @@ PhotoSwipeを使って画像をポップアップ表示する【Swiper（v7）�
 
 
 【JS】MutationObserverでDOMを監視する[PhotoSwipe（v5）+Swiper（v8）連携デモ]
-<p><a href="https://notes.sharesl.net/articles/2326/" target="_blank">https://notes.sharesl.net/articles/2539/</a></p>
+<p><a href="https://notes.sharesl.net/articles/2539/" target="_blank">https://notes.sharesl.net/articles/2539/</a></p>
